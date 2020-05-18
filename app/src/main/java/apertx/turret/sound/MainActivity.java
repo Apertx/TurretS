@@ -11,11 +11,14 @@ import java.util.*;
 import android.media.*;
 
 public class MainActivity extends Activity {
+	SharedPreferences settings;
 	SoundPool sound;
 	boolean[] done;
+	long click;
+	long time;
 
 	public void onCreate(Bundle savedInstanceState) {
-		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
+		settings = PreferenceManager.getDefaultSharedPreferences(this);
 		if (settings.getBoolean("light", true) == false)
 			setTheme(android.R.style.Theme_Material);
 		CharSequence[] header = {
@@ -316,12 +319,12 @@ public class MainActivity extends Activity {
 		}
 		labelList.add(itemList);
 
-		sound = new SoundPool(4, 3, 0);
 		ExpandableListView elv = new ExpandableListView(this);
 		SimpleExpandableListAdapter adapter = new SimpleExpandableListAdapter(this,
 																			  headerList, android.R.layout.simple_expandable_list_item_1, new String[] {"header"}, new int[] {android.R.id.text1},
 																			  labelList, android.R.layout.simple_list_item_1, new String[] {"label"}, new int[] {android.R.id.text1});
 		elv.setAdapter(adapter);
+		sound = new SoundPool(4, 3, 0);
 		elv.setOnChildClickListener(new OnChildClickListener() {
 				@Override
 				public boolean onChildClick(ExpandableListView p1, View p2, int p3, int p4, long p5) {
@@ -332,6 +335,7 @@ public class MainActivity extends Activity {
 						MediaPlayer mp= MediaPlayer.create(MainActivity.this, 0x7f040000 + p6);
 						mp.start();
 					}
+					click++;
 					return false;
 				}
 			});
@@ -376,6 +380,25 @@ public class MainActivity extends Activity {
 				break;
 		}
 		return super.onOptionsItemSelected(item);
+	}
+
+	@Override
+	protected void onResume() {
+		super.onResume();
+		time = System.currentTimeMillis();
+		click = 0;
+	}
+
+	@Override
+	protected void onPause() {
+		super.onPause();
+		SharedPreferences.Editor editor = settings.edit();
+		click += settings.getLong("click", 0);
+		editor.putLong("click", click);
+		time = System.currentTimeMillis() - time;
+		time += settings.getLong("time", 0);
+		editor.putLong("time", time);
+		editor.apply();
 	}
 
 	@Override

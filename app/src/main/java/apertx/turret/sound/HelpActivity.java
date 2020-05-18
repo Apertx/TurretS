@@ -12,9 +12,13 @@ public class HelpActivity extends Activity {
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
-		if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean("light", true) == false)
+		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
+		if (settings.getBoolean("light", true) == false)
 			setTheme(android.R.style.Theme_Material);
-		CharSequence[] credit = {"App in Play market", "Source code", "About Turret soundboard", "Translation support"};
+		final long click = settings.getLong("click", 0);
+		final long time = settings.getLong("time", 0);
+		final String name = settings.getString("name", "Subject #1");
+		CharSequence[] credit = {"App in Play market", "Source code", "Statistics", "About Turret soundboard", "Translation support"};
 		super.onCreate(savedInstanceState);
 		ListView list = new ListView(this);
 		list.setAdapter(new ArrayAdapter<CharSequence>(this, android.R.layout.simple_list_item_1, credit));
@@ -29,11 +33,16 @@ public class HelpActivity extends Activity {
 							startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/Apertx/TurretS")));
 							break;
 						case 2:
+							new AlertDialog.Builder(HelpActivity.this).setTitle(name + "'s statistics").
+								setMessage("Time spent: " + (time / 60000) + "m " + (time / 1000) + "s.\nClicks made: " + click).
+								setPositiveButton("OK", null).show();
+							break;
+						case 3:
 							new AlertDialog.Builder(HelpActivity.this).setTitle("About Turret soundboard").
 								setMessage("This application is designed for fans of the game Portal 2. If you have suggestions for improving the application, please write in the reviews, I will try to add new features to the application").
 								setPositiveButton("OK", null).show();
 								break;
-						case 3:
+						case 4:
 							Toast.makeText(HelpActivity.this, "Coming soon...", 0).show();
 							break;
 					}
