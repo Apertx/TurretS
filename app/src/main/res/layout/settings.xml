@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen
+	xmlns:android="http://schemas.android.com/apk/res/android">
+
+	<CheckBoxPreference
+		android:defaultValue="true"
+		android:key="light"
+		android:title="Light theme"
+		android:summary="Use light theme in app"/>
+
+	<EditTextPreference
+		android:key="name"
+		android:title="My name"
+		android:summary="Contact me by this name"
+		android:defaultValue="Subject #1"
+		android:dialogTitle="Enter your name"/>
+
+</PreferenceScreen>
+
