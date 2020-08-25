@@ -11,37 +11,23 @@ import java.util.*;
 import android.media.*;
 
 public class MainActivity extends Activity {
+	static final int ID_MENU_SETTINGS = 0;
+	static final int ID_MENU_HELP = 1;
+	static final int ID_MENU_EXIT = 2;
+	static final int SOUND_MAX_STREAMS = 8;
+	static final int SOUND_RES_ID = 0x7f040000;
+
+	static final byte[] quote_offset = {0,3,14,24,30,40,47,54,59,64,69,76,84,90,93,94,97,102};
+
 	SharedPreferences settings;
 	SoundPool sound;
-	boolean[] done;
-	long click;
-	long time;
+	byte sound_done;
+	int clicks;
 
-	public void onCreate(Bundle savedInstanceState) {
-		settings = PreferenceManager.getDefaultSharedPreferences(this);
-		if (settings.getBoolean("light", true) == false)
-			setTheme(android.R.style.Theme_Material);
-		CharSequence[] header = {
-			"Turret fire",
-			"Turret launched into the air",
-			"Turrets being zapped by tre Thermal Discouragement Beam",
-			"Turret being smashed",
-			"Turret factory",
-			"Turret sound effects",
-			"Turret found its target",
-			"Turret searching",
-			"Colliding Turrets",
-			"Turrets deploying",
-			"Turret deaths",
-			"Turrets being picked up",
-			"Turret deactivation",
-			"Turret lost its target",
-			"Turret being emancipated/fizzled",
-			"Turrets being shot by other Turrets",
-			"Turrets being tripped over",
-			"Final chamber of the Co-op Course Mobility Gels"
-		};
-		CharSequence[] p0 = {
+	public void onCreate(Bundle b0) {
+		super.onCreate(b0);
+		settings = getSharedPreferences("data", MODE_PRIVATE);
+		CharSequence[] po = {
 			"[Turret fire]",
 			"[Turret fire]",
 			"[Turret fire]"
@@ -180,139 +166,18 @@ public class MainActivity extends Activity {
 		CharSequence[] p17 = {
 			"But I need to protect the humans."
 		};
-		final byte[] offset = {0, 3, 14, 24, 30, 40, 47, 54, 59, 64, 69, 76, 84, 90, 93, 94, 97, 102};
-		done = new boolean[103];
-		super.onCreate(savedInstanceState);
+		sound_done = 0;
 		ArrayList<ArrayList<Map<String, CharSequence>>> labelList = new ArrayList<>();
 		ArrayList<Map<String, CharSequence>> headerList = new ArrayList<>();
 		ArrayList<Map<String, CharSequence>> itemList = new ArrayList<>();
 		Map<String, CharSequence> map;
 
-		for (CharSequence label : header) {
+		for (CharSequence label : po) {
 			map = new HashMap<>();
 			map.put("header", label);
 			headerList.add(map);
 		}
-		for (CharSequence label : p0) {
-			map = new HashMap<>();
-			map.put("label", label);
-			itemList.add(map);
-		}
-		labelList.add(itemList);
-		itemList = new ArrayList<>();
-		for (CharSequence label : p1) {
-			map = new HashMap<>();
-			map.put("label", label);
-			itemList.add(map);
-		}
-		labelList.add(itemList);
-		itemList = new ArrayList<>();
-		for (CharSequence label : p2) {
-			map = new HashMap<>();
-			map.put("label", label);
-			itemList.add(map);
-		}
-		labelList.add(itemList);
-		itemList = new ArrayList<>();
-		for (CharSequence label : p3) {
-			map = new HashMap<>();
-			map.put("label", label);
-			itemList.add(map);
-		}
-		labelList.add(itemList);
-		itemList = new ArrayList<>();
-		for (CharSequence label : p4) {
-			map = new HashMap<>();
-			map.put("label", label);
-			itemList.add(map);
-		}
-		labelList.add(itemList);
-		itemList = new ArrayList<>();
-		for (CharSequence label : p5) {
-			map = new HashMap<>();
-			map.put("label", label);
-			itemList.add(map);
-		}
-		labelList.add(itemList);
-		itemList = new ArrayList<>();
-		for (CharSequence label : p6) {
-			map = new HashMap<>();
-			map.put("label", label);
-			itemList.add(map);
-		}
-		labelList.add(itemList);
-		itemList = new ArrayList<>();
-		for (CharSequence label : p7) {
-			map = new HashMap<>();
-			map.put("label", label);
-			itemList.add(map);
-		}
-		labelList.add(itemList);
-		itemList = new ArrayList<>();
-		for (CharSequence label : p8) {
-			map = new HashMap<>();
-			map.put("label", label);
-			itemList.add(map);
-		}
-		labelList.add(itemList);
-		itemList = new ArrayList<>();
-		for (CharSequence label : p9) {
-			map = new HashMap<>();
-			map.put("label", label);
-			itemList.add(map);
-		}
-		labelList.add(itemList);
-		itemList = new ArrayList<>();
-		for (CharSequence label : p10) {
-			map = new HashMap<>();
-			map.put("label", label);
-			itemList.add(map);
-		}
-		labelList.add(itemList);
-		itemList = new ArrayList<>();
-		for (CharSequence label : p11) {
-			map = new HashMap<>();
-			map.put("label", label);
-			itemList.add(map);
-		}
-		labelList.add(itemList);
-		itemList = new ArrayList<>();
-		for (CharSequence label : p12) {
-			map = new HashMap<>();
-			map.put("label", label);
-			itemList.add(map);
-		}
-		labelList.add(itemList);
-		itemList = new ArrayList<>();
-		for (CharSequence label : p13) {
-			map = new HashMap<>();
-			map.put("label", label);
-			itemList.add(map);
-		}
-		labelList.add(itemList);
-		itemList = new ArrayList<>();
-		for (CharSequence label : p14) {
-			map = new HashMap<>();
-			map.put("label", label);
-			itemList.add(map);
-		}
-		labelList.add(itemList);
-		itemList = new ArrayList<>();
-		for (CharSequence label : p15) {
-			map = new HashMap<>();
-			map.put("label", label);
-			itemList.add(map);
-		}
-		labelList.add(itemList);
-		itemList = new ArrayList<>();
-		for (CharSequence label : p16) {
-			map = new HashMap<>();
-			map.put("label", label);
-			itemList.add(map);
-		}
-		labelList.add(itemList);
-		itemList = new ArrayList<>();
-		for (CharSequence label : p17) {
+		for (CharSequence label : po) {
 			map = new HashMap<>();
 			map.put("label", label);
 			itemList.add(map);
@@ -320,22 +185,27 @@ public class MainActivity extends Activity {
 		labelList.add(itemList);
 
 		ExpandableListView elv = new ExpandableListView(this);
-		SimpleExpandableListAdapter adapter = new SimpleExpandableListAdapter(this,
-																			  headerList, android.R.layout.simple_expandable_list_item_1, new String[] {"header"}, new int[] {android.R.id.text1},
-																			  labelList, android.R.layout.simple_list_item_1, new String[] {"label"}, new int[] {android.R.id.text1});
+		SimpleExpandableListAdapter adapter = new SimpleExpandableListAdapter(this, headerList, android.R.layout.simple_expandable_list_item_1, new String[] {"header"}, new int[] {android.R.id.text1}, labelList, android.R.layout.simple_list_item_1, new String[] {"label"}, new int[] {android.R.id.text1});
 		elv.setAdapter(adapter);
-		sound = new SoundPool(4, 3, 0);
+
+		sound = new SoundPool(SOUND_MAX_STREAMS, AudioManager.STREAM_MUSIC, 0);
 		elv.setOnChildClickListener(new OnChildClickListener() {
 				@Override
-				public boolean onChildClick(ExpandableListView p1, View p2, int p3, int p4, long p5) {
-					int p6 = offset[p3] + p4;
-					if (done[p6])
-						sound.play(p6 + 1, 1, 1, 1, 0, 1);
+				public boolean onChildClick(ExpandableListView p0, View p1, int p2, int p3, long p4) {
+					int sound_id = quote_offset[p2] + p3;
+					if (sound_id < sound_done)
+						sound.play(sound_id + 1, 1, 1, 1, 0, 1);
 					else {
-						MediaPlayer mp= MediaPlayer.create(MainActivity.this, 0x7f040000 + p6);
+						MediaPlayer mp= MediaPlayer.create(MainActivity.this, SOUND_RES_ID + sound_id);
+						mp.setOnSeekCompleteListener(new MediaPlayer.OnSeekCompleteListener(){
+								@Override
+								public void onSeekComplete(MediaPlayer p5) {
+									p5.release();
+								}
+							});
 						mp.start();
 					}
-					click++;
+					clicks++;
 					return false;
 				}
 			});
@@ -344,16 +214,14 @@ public class MainActivity extends Activity {
 				@Override
 				public void run() {
 					for (byte i = 0; i < 103; i++)
-						sound.load(MainActivity.this, 0x7f040000 + i, 0);
+						sound.load(MainActivity.this, SOUND_RES_ID + i, 0);
 				}
 			}).start();
 		sound.setOnLoadCompleteListener(new SoundPool.OnLoadCompleteListener() {
 				@Override
-				public void onLoadComplete(SoundPool p1, int p2, int p3) {
-					if (p3 == 0)
-						done[p2 - 1] = true;
-					else
-						Toast.makeText(MainActivity.this, "Error while loading", 0).show();
+				public void onLoadComplete(SoundPool p0, int p1, int p2) {
+					if (p2 == 0)
+						sound_done += 1;
 				}
 			});
 	}
@@ -383,22 +251,15 @@ public class MainActivity extends Activity {
 	}
 
 	@Override
-	protected void onResume() {
-		super.onResume();
-		time = System.currentTimeMillis();
-		click = 0;
+	protected void onSaveInstanceState(Bundle b0) {
+		b0.putInt("clicks", clicks);
+		super.onSaveInstanceState(b0);
 	}
 
 	@Override
-	protected void onPause() {
-		super.onPause();
-		SharedPreferences.Editor editor = settings.edit();
-		click += settings.getLong("click", 0);
-		editor.putLong("click", click);
-		time = System.currentTimeMillis() - time;
-		time += settings.getLong("time", 0);
-		editor.putLong("time", time);
-		editor.apply();
+	protected void onRestoreInstanceState(Bundle b0) {
+		super.onRestoreInstanceState(b0);
+		clicks = b0.getInt("clicks");
 	}
 
 	@Override
