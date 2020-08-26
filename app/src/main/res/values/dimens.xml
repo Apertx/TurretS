@@ -4,5 +4,6 @@
 	<dimen name="bubble_margin">8dp</dimen>
 	<dimen name="bubble_text_size">16sp</dimen>
 	<dimen name="header_margin">16dp</dimen>
+	<dimen name="header_margin_left">32dp</dimen>
 	<dimen name="header_text_size">24sp</dimen>
 </resources>

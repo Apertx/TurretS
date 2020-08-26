@@ -9,6 +9,7 @@ import android.view.*;
 import android.widget.*;
 import android.widget.ExpandableListView.*;
 import java.util.*;
+import android.view.animation.*;
 
 public class MainActivity extends Activity {
 	static final int ID_MENU_SETTINGS = 0;
@@ -22,45 +23,33 @@ public class MainActivity extends Activity {
 	static final int SOUND_PRIORITY = 1;
 	static final int SOUND_RES_ID = 0x7f040000;
 
+	ExpandableListView elv;
+	BaseExpandableListAdapter bela;
 	SharedPreferences settings;
 	SoundPool sound;
 	byte sound_done;
 	int clicks;
+	boolean[] sets;
+	Animation anim;
 
 	public void onCreate(Bundle b0) {
 		super.onCreate(b0);
-		settings = getSharedPreferences("data", MODE_PRIVATE);
-		clicks = settings.getInt("clicks", 0);
-		sound_done = 0;
-
 		final String[] headers = getResources().getStringArray(R.array.quote_headers);
 		final String[] items = getResources().getStringArray(R.array.quote_items);
 		final byte[] quote_offset = {0,3,14,24,30,40,47,54,59,64,69,76,84,90,93,94,97,102,103};
-		ArrayList<ArrayList<Map<String, String>>> labelList = new ArrayList<>();
-		ArrayList<Map<String, String>> headerList;
-		ArrayList<Map<String, String>> itemList;
-		Map<String, String> map;
 
-		headerList = new ArrayList<Map<String, String>>();
-		for (byte j = 0; j < 18; j += 1) {
-			map = new HashMap<String, String>();
-			map.put("header", headers[j]);
-			headerList.add(map);
-		}
-		byte i = 0;
-		for (byte offset = 1; offset < 19; offset += 1) {
-			itemList = new ArrayList<Map<String, String>>();
-			for (; i < quote_offset[offset]; i += 1) {
-				map = new HashMap<String, String>();
-				map.put("item", items[i]);
-				itemList.add(map);
-			}
-			labelList.add(itemList);
-		}
+		anim = new AlphaAnimation(0.0f, 1.0f);
+		anim.setDuration(50);
+		settings = getSharedPreferences("data", MODE_PRIVATE);
+		clicks = settings.getInt("clicks", 0);
+		sets = new boolean[2];
+		sets[0] = settings.getBoolean("animate", false);
+		sets[1] = settings.getBoolean("center", true);
+		sound_done = 0;
 
-		ExpandableListView elv = new ExpandableListView(this);
+		elv = new ExpandableListView(this);
 		elv.setDividerHeight(0);
-		BaseExpandableListAdapter bela = new BaseExpandableListAdapter() {
+		bela = new BaseExpandableListAdapter() {
 			@Override public int getGroupCount() {
 				return headers.length;
 			}
@@ -83,16 +72,23 @@ public class MainActivity extends Activity {
 				return false;
 			}
 			@Override public View getGroupView(int p0, boolean p1, View p2, ViewGroup p3) {
-				if (p2 == null) p2 = LayoutInflater.from(MainActivity.this).inflate(R.layout.bubble, null);
-				TextView tv = p2.findViewById(R.id.bubble_text);
-				tv.setText(headers[p0]);
+				if (p2 == null) p2 = LayoutInflater.from(MainActivity.this).inflate(R.layout.header, null);
+				((TextView)p2.findViewById(R.id.header_text)).setText(headers[p0]);
 				return p2;
 			}
 			@Override public View getChildView(int p0, int p1, boolean p2, View p3, ViewGroup p4) {
-				if (p3 == null) p3 = LayoutInflater.from(MainActivity.this).inflate(R.layout.bubble, null);
-				TextView tv = p3.findViewById(R.id.bubble_text);
-				tv.setText(items[quote_offset[p0] + p1]);
+				LinearLayout layout;
+				TextView tv;
+				if (p3 == null)
+					p3 = LayoutInflater.from(MainActivity.this).inflate(R.layout.bubble, null);
+				layout = p3.findViewById(R.id.bubble_layout);
+				tv = p3.findViewById(R.id.bubble_text);
 				tv.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, 1.0f));
+				tv.setText(items[quote_offset[p0] + p1]);
+				if (sets[1])
+					layout.setGravity(Gravity.CENTER_HORIZONTAL);
+				if (sets[0])
+					layout.startAnimation(anim);
 				return p3;
 			}
 			@Override public boolean isChildSelectable(int p0, int p1) {
@@ -108,14 +104,19 @@ public class MainActivity extends Activity {
 					if (sound_id < sound_done)
 						sound.play(sound_id + 1, 1.0f, 1.0f, SOUND_PRIORITY, 0, 1.0f);
 					else {
-						MediaPlayer mp= MediaPlayer.create(MainActivity.this, SOUND_RES_ID + sound_id);
+						MediaPlayer mp = MediaPlayer.create(MainActivity.this, SOUND_RES_ID + sound_id);
 						mp.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
 								@Override
 								public void onCompletion(MediaPlayer p5) {
 									p5.release();
 								}
 							});
-						mp.start();
+						mp.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+								@Override
+								public void onPrepared(MediaPlayer p5) {
+									p5.start();
+								}
+							});
 					}
 					clicks++;
 					return false;
@@ -130,8 +131,7 @@ public class MainActivity extends Activity {
 				}
 			}).start();
 		sound.setOnLoadCompleteListener(new SoundPool.OnLoadCompleteListener() {
-				@Override
-				public void onLoadComplete(SoundPool p0, int p1, int p2) {
+				@Override public void onLoadComplete(SoundPool p0, int p1, int p2) {
 					if (p2 == 0)
 						sound_done += 1;
 					else
@@ -140,21 +140,28 @@ public class MainActivity extends Activity {
 			});
 	}
 
-	@Override public boolean onCreateOptionsMenu(Menu menu) {
-		menu.add(Menu.NONE, ID_MENU_SETTINGS, Menu.NONE, getString(R.string.settings));
-		SubMenu sm = menu.addSubMenu(getString(R.string.help));
-		sm.add(Menu.NONE, ID_MENU_APP_IN_GP, Menu.NONE, getString(R.string.app_in_gp));
-		sm.add(Menu.NONE, ID_MENU_SOURCE_CODE, Menu.NONE, getString(R.string.source_code));
-		sm.add(Menu.NONE, ID_MENU_STAT, Menu.NONE, getString(R.string.stat));
-		sm.add(Menu.NONE, ID_MENU_ABOUT, Menu.NONE, getString(R.string.about));
-		menu.add(Menu.NONE, ID_MENU_EXIT, Menu.NONE, getString(R.string.exit));
-		return super.onCreateOptionsMenu(menu);
+	@Override public boolean onCreateOptionsMenu(Menu p0) {
+		p0.add(Menu.NONE, ID_MENU_SETTINGS, Menu.NONE, getString(R.string.settings));
+		SubMenu sm = p0.addSubMenu(getString(R.string.help));
+		sm.add(Menu.NONE, ID_MENU_APP_IN_GP, Menu.NONE, R.string.app_in_gp);
+		sm.add(Menu.NONE, ID_MENU_SOURCE_CODE, Menu.NONE, R.string.source_code);
+		sm.add(Menu.NONE, ID_MENU_STAT, Menu.NONE, R.string.stat);
+		sm.add(Menu.NONE, ID_MENU_ABOUT, Menu.NONE, R.string.about);
+		p0.add(Menu.NONE, ID_MENU_EXIT, Menu.NONE, R.string.exit);
+		return super.onCreateOptionsMenu(p0);
 	}
 
-	@Override public boolean onOptionsItemSelected(MenuItem item) {
-		switch (item.getItemId()) {
+	@Override public boolean onOptionsItemSelected(MenuItem p0) {
+		switch (p0.getItemId()) {
 			case ID_MENU_SETTINGS:
-				
+				new AlertDialog.Builder(this).
+					setTitle(R.string.settings).
+					setMultiChoiceItems(R.array.sets, sets, new AlertDialog.OnMultiChoiceClickListener() {
+						@Override public void onClick(DialogInterface p1, int p2, boolean p3) {
+							sets[p2] = p3;
+						}
+					}).
+					show();
 				break;
 			case ID_MENU_EXIT:
 				finish();
@@ -167,35 +174,41 @@ public class MainActivity extends Activity {
 				break;
 			case ID_MENU_STAT:
 				new AlertDialog.Builder(this).
-					setTitle(getString(R.string.stat)).
+					setTitle(R.string.stat).
 					setMessage(new StringBuilder().append(getString(R.string.stat_message)).append(": ").append(clicks).toString()).
 					setPositiveButton(R.string.ok, null).
 					show();
 				break;
 			case ID_MENU_ABOUT:
 				new AlertDialog.Builder(this).
-					setTitle(getString(R.string.about)).
-					setMessage(getString(R.string.about_message)).
+					setTitle(R.string.about).
+					setMessage(R.string.about_message).
 					setPositiveButton(R.string.ok, null).
 					show();
 				break;
 		}
-		return super.onOptionsItemSelected(item);
+		return super.onOptionsItemSelected(p0);
 	}
 
 	@Override protected void onSaveInstanceState(Bundle b0) {
 		b0.putInt("clicks", clicks);
+		b0.putBooleanArray("sets", sets);
 		super.onSaveInstanceState(b0);
 	}
 
 	@Override protected void onRestoreInstanceState(Bundle b0) {
 		super.onRestoreInstanceState(b0);
 		clicks = b0.getInt("clicks");
+		sets = b0.getBooleanArray("sets");
 	}
 
 	@Override protected void onDestroy() {
 		super.onDestroy();
 		sound.release();
-		settings.edit().putInt("clicks", clicks).commit();
+		settings.edit().
+			putInt("clicks", clicks).
+			putBoolean("animate", sets[0]).
+			putBoolean("center", sets[1]).
+			commit();
 	}
 }

@@ -125,4 +125,8 @@
 		<item>Ow ow ow ow owww.</item>
 		<item>But I need to protect the humans.</item>
 	</string-array>
+	<string-array name ="sets">
+		<item>Animation</item>
+		<item>Bubble in center</item>
+	</string-array>
 </resources>
