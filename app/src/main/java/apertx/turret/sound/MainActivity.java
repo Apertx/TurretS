@@ -12,9 +12,14 @@ import android.media.*;
 
 public class MainActivity extends Activity {
 	static final int ID_MENU_SETTINGS = 0;
-	static final int ID_MENU_HELP = 1;
-	static final int ID_MENU_EXIT = 2;
+	static final int ID_MENU_EXIT = 1;
+	static final int ID_MENU_APP_IN_GP = 2;
+	static final int ID_MENU_SOURCE_CODE = 3;
+	static final int ID_MENU_STAT = 4;
+	static final int ID_MENU_ABOUT = 5;
+	
 	static final int SOUND_MAX_STREAMS = 8;
+	static final int SOUND_PRIORITY = 1;
 	static final int SOUND_RES_ID = 0x7f040000;
 
 	static final byte[] quote_offset = {0,3,14,24,30,40,47,54,59,64,69,76,84,90,93,94,97,102};
@@ -172,12 +177,12 @@ public class MainActivity extends Activity {
 		ArrayList<Map<String, CharSequence>> itemList = new ArrayList<>();
 		Map<String, CharSequence> map;
 
-		for (CharSequence label : po) {
+		for (CharSequence label: getResources().getStringArray(R.array.quote_headers)) {
 			map = new HashMap<>();
 			map.put("header", label);
 			headerList.add(map);
 		}
-		for (CharSequence label : po) {
+		for (CharSequence label: po) {
 			map = new HashMap<>();
 			map.put("label", label);
 			itemList.add(map);
@@ -194,7 +199,7 @@ public class MainActivity extends Activity {
 				public boolean onChildClick(ExpandableListView p0, View p1, int p2, int p3, long p4) {
 					int sound_id = quote_offset[p2] + p3;
 					if (sound_id < sound_done)
-						sound.play(sound_id + 1, 1, 1, 1, 0, 1);
+						sound.play(sound_id + 1, 1, 1, 1, 0, SOUND_PRIORITY);
 					else {
 						MediaPlayer mp= MediaPlayer.create(MainActivity.this, SOUND_RES_ID + sound_id);
 						mp.setOnSeekCompleteListener(new MediaPlayer.OnSeekCompleteListener(){
@@ -228,24 +233,37 @@ public class MainActivity extends Activity {
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		menu.add(Menu.NONE, 10, Menu.NONE, "Settings");
-		menu.add(Menu.NONE, 11, Menu.NONE, "Help");
-		menu.add(Menu.NONE, 12, Menu.NONE, "Exit");
+		menu.add(Menu.NONE, ID_MENU_SETTINGS, Menu.NONE, getString(R.string.settings));
+		SubMenu sm = menu.addSubMenu(getString(R.string.help));
+		sm.add(Menu.NONE, ID_MENU_APP_IN_GP, Menu.NONE, getString(R.string.app_in_gp));
+		sm.add(Menu.NONE, ID_MENU_SOURCE_CODE, Menu.NONE, getString(R.string.source_code));
+		sm.add(Menu.NONE, ID_MENU_STAT, Menu.NONE, getString(R.string.stat));
+		sm.add(Menu.NONE, ID_MENU_ABOUT, Menu.NONE, getString(R.string.about));
+		menu.add(Menu.NONE, ID_MENU_EXIT, Menu.NONE, getString(R.string.exit));
 		return super.onCreateOptionsMenu(menu);
 	}
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
-			case 10:
-				startActivity(new Intent(MainActivity.this, SettingsActivity.class));
+			case ID_MENU_SETTINGS:
+				
 				break;
-			case 11:
-				startActivity(new Intent(MainActivity.this, HelpActivity.class));
-				break;
-			case 12:
+			case ID_MENU_EXIT:
 				finish();
 				break;
+			case ID_MENU_APP_IN_GP:
+				startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=apertx.turret.sound")));
+				break;
+			case ID_MENU_SOURCE_CODE:
+				startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/Apertx/TurretS")));
+				break;
+			case ID_MENU_STAT:
+				new AlertDialog.Builder(this).
+					setTitle(getString(R.string.stat).
+					setMessage(new StringBuilder().append("").append(": ").append(clicks).toString()).
+					setPositiveButton(R.string.ok, null).
+					show();
 		}
 		return super.onOptionsItemSelected(item);
 	}
@@ -266,6 +284,6 @@ public class MainActivity extends Activity {
 	protected void onDestroy() {
 		super.onDestroy();
 		sound.release();
-		sound = null;
+		settings.edit().putInt("clicks", clicks).commit();
 	}
 }
