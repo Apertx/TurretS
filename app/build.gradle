@@ -4,10 +4,10 @@ android {
 	buildToolsVersion "21.1.0"
 	defaultConfig {
 		applicationId "apertx.turret.sound"
-		minSdkVersion 9
+		minSdkVersion 3
 		targetSdkVersion 29
 		versionCode 3
-		versionName "1.1"
+		versionName "1.2"
 	}
 	buildTypes {
 		release {
