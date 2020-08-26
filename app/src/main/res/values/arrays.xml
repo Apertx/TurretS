@@ -21,6 +21,108 @@
 		<item>Final chamber of the Co-op Course Mobility Gels</item>
 	</string-array>
 	<string-array name="quote_items">
-		
+		<item>[Turret fire]</item>
+		<item>[Turret fire]</item>
+		<item>[Turret fire]</item>
+		<item>Wheee.</item>
+		<item>Wheeeeeee.</item>
+		<item>I\'m afraid of heights.</item>
+		<item>Noooo.</item>
+		<item>See you soon.</item>
+		<item>I\'m scared.</item>
+		<item>I\'m scared.</item>
+		<item>Hooray.</item>
+		<item>Glorious freedom.</item>
+		<item>I\'m flying.</item>
+		<item>Goodbye.</item>
+		<item>Ow.</item>
+		<item>Oww.</item>
+		<item>Owwww.</item>
+		<item>It burns.</item>
+		<item>I\'m on fire.</item>
+		<item>I\'m on fire owww.</item>
+		<item>Please stop.</item>
+		<item>You\'ve made your point.</item>
+		<item>OK you win.</item>
+		<item>This is not good.</item>
+		<item>Ooohhh.</item>
+		<item>Owwww.</item>
+		<item>Can\'t...breathe.</item>
+		<item>Excuse me you\'re squishing me.</item>
+		<item>Um, hello.</item>
+		<item>Help! Being squished.</item>
+		<item>Hello?</item>
+		<item>Hello.</item>
+		<item>Target acquired.</item>
+		<item>Whyyyy.</item>
+		<item>I did everything you askedddd.</item>
+		<item>I don\'t understandddd.</item>
+		<item>I\'m fineeee</item>
+		<item>Ahhhh.</item>
+		<item>Wheee oh noooo.</item>
+		<item>Whyyy.</item>
+		<item>[Activation sound]</item>
+		<item>[Alarm sound]</item>
+		<item>[Alert sound]</item>
+		<item>[Deploy sound]</item>
+		<item>[Death sound]</item>
+		<item>[Ping sound]</item>
+		<item>[Retract sound]</item>
+		<item>Hi.</item>
+		<item>Target acquired.</item>
+		<item>Firing.</item>
+		<item>Hello friend.</item>
+		<item>Gotcha.</item>
+		<item>There you are.</item>
+		<item>I see you.</item>
+		<item>Hellooo.</item>
+		<item>Searching.</item>
+		<item>Sentry mode activated.</item>
+		<item>Is anyone there?</item>
+		<item>Could you come over here?</item>
+		<item>Coming through.</item>
+		<item>Excuse me.</item>
+		<item>Sorry.</item>
+		<item>My fault.</item>
+		<item>Ohh.</item>
+		<item>Hello.</item>
+		<item>Deploying.</item>
+		<item>Activated.</item>
+		<item>There you are.</item>
+		<item>Who\'s there?</item>
+		<item>Ahahaa.</item>
+		<item>Critical error.</item>
+		<item>Shutting down.</item>
+		<item>I don\'t blame you.</item>
+		<item>I don\'t hate you.</item>
+		<item>Whyyyy.</item>
+		<item>No hard feelings.</item>
+		<item>Hey.</item>
+		<item>Hey hey hey.</item>
+		<item>Put me down.</item>
+		<item>Who are you?</item>
+		<item>Hey.</item>
+		<item>Please put me down.</item>
+		<item>Help.</item>
+		<item>Uh oh.</item>
+		<item>Goodbay.</item>
+		<item>Sleep mode activated.</item>
+		<item>Hibernating.</item>
+		<item>Goodnight.</item>
+		<item>Resting.</item>
+		<item>Nap time.</item>
+		<item>Are you still there?</item>
+		<item>Target lost.</item>
+		<item>Searching.</item>
+		<item>aiaiaiaiaiai.</item>
+		<item>Hey, it\'s me!</item>
+		<item>Don\'t shoot!</item>
+		<item>Stop shooting!</item>
+		<item>Aah.</item>
+		<item>Self test error.</item>
+		<item>Malfunctioning.</item>
+		<item>Aaaah.</item>
+		<item>Ow ow ow ow owww.</item>
+		<item>But I need to protect the humans.</item>
 	</string-array>
 </resources>
