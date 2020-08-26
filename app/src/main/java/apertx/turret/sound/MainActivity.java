@@ -72,9 +72,9 @@ public class MainActivity extends Activity {
 						sound.play(sound_id + 1, 1, 1, 1, 0, SOUND_PRIORITY);
 					else {
 						MediaPlayer mp= MediaPlayer.create(MainActivity.this, SOUND_RES_ID + sound_id);
-						mp.setOnSeekCompleteListener(new MediaPlayer.OnSeekCompleteListener(){
+						mp.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
 								@Override
-								public void onSeekComplete(MediaPlayer p5) {
+								public void onCompletion(MediaPlayer p5) {
 									p5.release();
 								}
 							});
