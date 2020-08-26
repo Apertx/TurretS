@@ -2,13 +2,13 @@ package apertx.turret.sound;
 
 import android.app.*;
 import android.content.*;
+import android.media.*;
+import android.net.*;
 import android.os.*;
-import android.preference.*;
 import android.view.*;
 import android.widget.*;
 import android.widget.ExpandableListView.*;
 import java.util.*;
-import android.media.*;
 
 public class MainActivity extends Activity {
 	static final int ID_MENU_SETTINGS = 0;
@@ -260,7 +260,7 @@ public class MainActivity extends Activity {
 				break;
 			case ID_MENU_STAT:
 				new AlertDialog.Builder(this).
-					setTitle(getString(R.string.stat).
+					setTitle(getString(R.string.stat)).
 					setMessage(new StringBuilder().append("").append(": ").append(clicks).toString()).
 					setPositiveButton(R.string.ok, null).
 					show();
