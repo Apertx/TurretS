@@ -2,16 +2,16 @@
 <LinearLayout
 	xmlns:android="http://schemas.android.com/apk/res/android"
 	android:layout_width="fill_parent"
-	android:layout_height="fill_parent"
-	android:orientation="vertical"
+	android:layout_height="wrap_content"
+	android:orientation="horizontal"
 	android:id="@+id/bubble_layout">
 
 	<LinearLayout
 		android:orientation="horizontal"
-		android:layout_width="wrap_content"
+		android:layout_width="0dp"
 		android:layout_height="wrap_content"
-		android:layout_marginTop="@dimen/bubble_margin"
-		android:layout_marginBottom="@dimen/bubble_margin">
+		android:layout_margin="@dimen/bubble_margin"
+		android:layout_weight="1.0">
 
 		<LinearLayout
 			android:orientation="vertical"
@@ -37,12 +37,13 @@
 		</LinearLayout>
 
 		<TextView
-			android:layout_width="wrap_content"
+			android:layout_width="0dp"
 			android:layout_height="wrap_content"
 			android:padding="@dimen/bubble_margin"
 			android:id="@+id/bubble_text"
 			android:background="@color/bubble_color"
-			android:textSize="@dimen/bubble_text_size"/>
+			android:textSize="@dimen/bubble_text_size"
+			android:layout_weight="1.0"/>
 
 		<LinearLayout
 			android:orientation="vertical"
@@ -68,6 +69,13 @@
 		</LinearLayout>
 
 	</LinearLayout>
+
+	<ImageView
+		android:layout_width="wrap_content"
+		android:layout_height="fill_parent"
+		android:id="@+id/bubble_notif"
+		android:src="@android:drawable/ic_menu_call"
+		android:padding="@dimen/bubble_margin"/>
 
 </LinearLayout>
 

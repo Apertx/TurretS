@@ -10,14 +10,15 @@ import android.widget.*;
 import android.widget.ExpandableListView.*;
 import java.util.*;
 import android.view.animation.*;
+import android.provider.*;
 
 public class MainActivity extends Activity {
-	static final int ID_MENU_SETTINGS = 0;
-	static final int ID_MENU_EXIT = 1;
-	static final int ID_MENU_APP_IN_GP = 2;
-	static final int ID_MENU_SOURCE_CODE = 3;
-	static final int ID_MENU_STAT = 4;
-	static final int ID_MENU_ABOUT = 5;
+	static final int ID_MENU_SETTINGS = 10;
+	static final int ID_MENU_EXIT = 11;
+	static final int ID_MENU_APP_IN_GP = 12;
+	static final int ID_MENU_SOURCE_CODE = 13;
+	static final int ID_MENU_STAT = 14;
+	static final int ID_MENU_ABOUT = 15;
 
 	static final int SOUND_MAX_STREAMS = 8;
 	static final int SOUND_PRIORITY = 1;
@@ -34,12 +35,13 @@ public class MainActivity extends Activity {
 
 	public void onCreate(Bundle b0) {
 		super.onCreate(b0);
+		setVolumeControlStream(AudioManager.STREAM_MUSIC);
 		final String[] headers = getResources().getStringArray(R.array.quote_headers);
 		final String[] items = getResources().getStringArray(R.array.quote_items);
 		final byte[] quote_offset = {0,3,14,24,30,40,47,54,59,64,69,76,84,90,93,94,97,102,103};
 
-		anim = new AlphaAnimation(0.0f, 1.0f);
-		anim.setDuration(50);
+		anim = new AlphaAnimation(0.5f, 1.0f);
+		anim.setDuration(200);
 		settings = getSharedPreferences("data", MODE_PRIVATE);
 		clicks = settings.getInt("clicks", 0);
 		sets = new boolean[2];
@@ -79,14 +81,42 @@ public class MainActivity extends Activity {
 			@Override public View getChildView(int p0, int p1, boolean p2, View p3, ViewGroup p4) {
 				LinearLayout layout;
 				TextView tv;
+				final int sound_id = quote_offset[p0] + p1;
 				if (p3 == null)
 					p3 = LayoutInflater.from(MainActivity.this).inflate(R.layout.bubble, null);
 				layout = p3.findViewById(R.id.bubble_layout);
 				tv = p3.findViewById(R.id.bubble_text);
-				tv.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, 1.0f));
 				tv.setText(items[quote_offset[p0] + p1]);
-				if (sets[1])
-					layout.setGravity(Gravity.CENTER_HORIZONTAL);
+				tv.setOnClickListener(new OnClickListener() {
+						@Override
+						public void onClick(View p5) {
+							if (sound_id < sound_done)
+								sound.play(sound_id + 1, 1.0f, 1.0f, SOUND_PRIORITY, 0, 1.0f);
+							else {
+								MediaPlayer mp = MediaPlayer.create(MainActivity.this, SOUND_RES_ID + sound_id);
+								mp.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+										@Override public void onCompletion(MediaPlayer p5) {
+											p5.release();
+										}
+									});
+								mp.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+										@Override public void onPrepared(MediaPlayer p5) {
+											p5.start();
+										}
+									});
+							}
+							clicks += 1;
+						}
+					});
+				((ImageView)p3.findViewById(R.id.bubble_notif)).setOnClickListener(new OnClickListener() {
+						@Override public void onClick(View p1) {
+							boolean canNotif = Settings.System.canWrite(MainActivity.this);
+							if (canNotif)
+								RingtoneManager.setActualDefaultRingtoneUri(MainActivity.this, RingtoneManager.TYPE_NOTIFICATION, Uri.parse(new StringBuilder().append("android.resource:///apertx.turrer.sound/").append(SOUND_RES_ID + sound_id).toString()));
+							else
+								startActivity(new Intent(Settings.ACTION_MANAGE_WRITE_SETTINGS));
+						}
+					});
 				if (sets[0])
 					layout.startAnimation(anim);
 				return p3;
@@ -98,30 +128,6 @@ public class MainActivity extends Activity {
 		elv.setAdapter(bela);
 
 		sound = new SoundPool(SOUND_MAX_STREAMS, AudioManager.STREAM_MUSIC, 0);
-		elv.setOnChildClickListener(new OnChildClickListener() {
-				@Override public boolean onChildClick(ExpandableListView p0, View p1, int p2, int p3, long p4) {
-					int sound_id = quote_offset[p2] + p3;
-					if (sound_id < sound_done)
-						sound.play(sound_id + 1, 1.0f, 1.0f, SOUND_PRIORITY, 0, 1.0f);
-					else {
-						MediaPlayer mp = MediaPlayer.create(MainActivity.this, SOUND_RES_ID + sound_id);
-						mp.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-								@Override
-								public void onCompletion(MediaPlayer p5) {
-									p5.release();
-								}
-							});
-						mp.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
-								@Override
-								public void onPrepared(MediaPlayer p5) {
-									p5.start();
-								}
-							});
-					}
-					clicks++;
-					return false;
-				}
-			});
 		setContentView(elv);
 
 		new Thread(new Runnable() {
