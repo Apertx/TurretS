@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-	<color name="bubble_color">#E0E0C0</color>
+	<color name="bubble_color">#202020</color>
+	<color name="bubble_primary">#C0C0C0</color>
 </resources>

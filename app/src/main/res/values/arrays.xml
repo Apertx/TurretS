@@ -125,8 +125,14 @@
 		<item>Ow ow ow ow owww.</item>
 		<item>But I need to protect the humans.</item>
 	</string-array>
+
 	<string-array name ="sets">
 		<item>Animation</item>
-		<item>Bubble in center</item>
+	</string-array>
+
+	<string-array name ="notif">
+		<item>Ringtone</item>
+		<item>Notification</item>
+		<item>Alarm</item>
 	</string-array>
 </resources>

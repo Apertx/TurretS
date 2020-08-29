@@ -43,7 +43,8 @@
 			android:id="@+id/bubble_text"
 			android:background="@color/bubble_color"
 			android:textSize="@dimen/bubble_text_size"
-			android:layout_weight="1.0"/>
+			android:layout_weight="1.0"
+			android:textColor="@color/bubble_primary"/>
 
 		<LinearLayout
 			android:orientation="vertical"
@@ -69,13 +70,6 @@
 		</LinearLayout>
 
 	</LinearLayout>
-
-	<ImageView
-		android:layout_width="wrap_content"
-		android:layout_height="fill_parent"
-		android:id="@+id/bubble_notif"
-		android:src="@android:drawable/ic_menu_call"
-		android:padding="@dimen/bubble_margin"/>
 
 </LinearLayout>
 
