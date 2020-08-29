@@ -49,7 +49,7 @@
 		<item>Owwww.</item>
 		<item>Can\'t...breathe.</item>
 		<item>Excuse me you\'re squishing me.</item>
-		<item>Um, hello.</item>
+		<item>Um</item><item> hello.</item>
 		<item>Help! Being squished.</item>
 		<item>Hello?</item>
 		<item>Hello.</item>
@@ -115,7 +115,7 @@
 		<item>Target lost.</item>
 		<item>Searching.</item>
 		<item>aiaiaiaiaiai.</item>
-		<item>Hey, it\'s me!</item>
+		<item>Hey</item><item> it\'s me!</item>
 		<item>Don\'t shoot!</item>
 		<item>Stop shooting!</item>
 		<item>Aah.</item>
@@ -135,4 +135,26 @@
 		<item>Notification</item>
 		<item>Alarm</item>
 	</string-array>
+
+	<integer-array name="quote_offset">
+		<item>0</item>
+		<item>3</item>
+		<item>14</item>
+		<item>24</item>
+		<item>30</item>
+		<item>40</item>
+		<item>47</item>
+		<item>54</item>
+		<item>59</item>
+		<item>64</item>
+		<item>69</item>
+		<item>76</item>
+		<item>84</item>
+		<item>90</item>
+		<item>93</item>
+		<item>94</item>
+		<item>97</item>
+		<item>102</item>
+		<item>103</item>
+	</integer-array>
 </resources>

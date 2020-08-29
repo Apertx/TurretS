@@ -25,23 +25,26 @@ public class MainActivity extends Activity {
 
 	ExpandableListView elv;
 	SharedPreferences settings;
+
 	SoundPool sound;
 	byte sound_done;
 	int clicks;
 	boolean[] sets;
-	Animation anim;
 
 	public void onCreate(Bundle b0) {
 		super.onCreate(b0);
 		setVolumeControlStream(AudioManager.STREAM_MUSIC);
-		final String[] headers = getResources().getStringArray(R.array.quote_headers);
-		final String[] items = getResources().getStringArray(R.array.quote_items);
-		final byte[] quote_offset = {0,3,14,24,30,40,47,54,59,64,69,76,84,90,93,94,97,102,103};
-
-		anim = new AlphaAnimation(0.5f, 1.0f);
-		anim.setDuration(200);
 		settings = getSharedPreferences("data", MODE_PRIVATE);
 		clicks = settings.getInt("clicks", 0);
+		sound = new SoundPool(SOUND_MAX_STREAMS, AudioManager.STREAM_MUSIC, 0);
+		sound.setOnLoadCompleteListener(new SoundPool.OnLoadCompleteListener() {
+				@Override public void onLoadComplete(SoundPool p0, int p1, int p2) {
+					if (p2 == 0) sound_done += 1;
+					else finish();
+				}
+			});
+
+		final int last_quote = getResources().getInteger(R.integer.last_quote);
 		sets = new boolean[1];
 		sets[0] = settings.getBoolean("animate", false);
 		sound_done = 0;
@@ -49,94 +52,77 @@ public class MainActivity extends Activity {
 		elv = new ExpandableListView(this);
 		elv.setDividerHeight(0);
 		elv.setBackgroundResource(R.color.bubble_primary);
-		elv.setAdapter(new BaseExpandableListAdapter() {
-				@Override public int getGroupCount() {
-					return headers.length;
-				}
-				@Override public int getChildrenCount(int p0) {
-					return quote_offset[p0 + 1] - quote_offset[p0];
-				}
-				@Override public Object getGroup(int p0) {
-					return headers[p0];
-				}
-				@Override public Object getChild(int p0, int p1) {
-					return items[quote_offset[p0] + p1];
-				}
-				@Override public long getGroupId(int p0) {
-					return p0;
-				}
-				@Override public long getChildId(int p0, int p1) {
-					return quote_offset[p0] + p1;
-				}
-				@Override public boolean hasStableIds() {
-					return false;
-				}
-				@Override public View getGroupView(int p0, boolean p1, View p2, ViewGroup p3) {
-					if (p2 == null) p2 = LayoutInflater.from(MainActivity.this).inflate(R.layout.header, null);
-					((TextView)p2.findViewById(R.id.header_text)).setText(headers[p0]);
-					return p2;
-				}
-				@Override public View getChildView(int p0, int p1, boolean p2, View p3, ViewGroup p4) {
-					LinearLayout layout;
-					TextView tv;
-					final int sound_id = quote_offset[p0] + p1;
-					if (p3 == null)
-						p3 = LayoutInflater.from(MainActivity.this).inflate(R.layout.bubble, null);
-					layout = p3.findViewById(R.id.bubble_layout);
-					tv = p3.findViewById(R.id.bubble_text);
-					tv.setText(items[quote_offset[p0] + p1]);
-					tv.setOnClickListener(new OnClickListener() {
-							@Override
-							public void onClick(View p5) {
-								if (getIntent().getAction() == RingtoneManager.ACTION_RINGTONE_PICKER) {
-									setResult(RESULT_OK, new Intent().putExtra(RingtoneManager.EXTRA_RINGTONE_PICKED_URI, Uri.parse(new StringBuilder().append("android.resource://apertx.turret.sound/").append(SOUND_RES_ID + sound_id).toString())));
-									finish();
-								} else {
-									if (sound_id < sound_done)
-										sound.play(sound_id + 1, 1.0f, 1.0f, SOUND_PRIORITY, 0, 1.0f);
-									else {
-										MediaPlayer mp = MediaPlayer.create(MainActivity.this, SOUND_RES_ID + sound_id);
-										mp.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-												@Override public void onCompletion(MediaPlayer p5) {
-													p5.release();
-												}
-											});
-										mp.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
-												@Override public void onPrepared(MediaPlayer p5) {
-													p5.start();
-												}
-											});
-									}
-									clicks += 1;
-								}
-							}
-						});
-					if (sets[0])
-						layout.startAnimation(anim);
-					return p3;
-				}
-				@Override public boolean isChildSelectable(int p0, int p1) {
-					return false;
-				}
-			});
-
-		sound = new SoundPool(SOUND_MAX_STREAMS, AudioManager.STREAM_MUSIC, 0);
+		elv.setAdapter(new Bela());
 		setContentView(elv);
 
 		new Thread(new Runnable() {
 				@Override public void run() {
-					for (byte i = 0; i < 103; i++)
+					for (int i = 0; i < last_quote; i++)
 						sound.load(MainActivity.this, SOUND_RES_ID + i, SOUND_PRIORITY);
 				}
 			}).start();
-		sound.setOnLoadCompleteListener(new SoundPool.OnLoadCompleteListener() {
-				@Override public void onLoadComplete(SoundPool p0, int p1, int p2) {
-					if (p2 == 0)
-						sound_done += 1;
-					else
-						finish();
-				}
-			});
+	}
+
+	class Bela extends BaseExpandableListAdapter {
+		Animation anim;
+		String[] headers;
+		String[] items;
+		int[] quote_offset;
+		Bela() {
+			anim = new AlphaAnimation(0.5f, 1.0f);
+			anim.setDuration(200);
+			headers = getResources().getStringArray(R.array.quote_headers);
+			items = getResources().getStringArray(R.array.quote_items);
+			quote_offset = getResources().getIntArray(R.array.quote_offset);
+		}
+		@Override public int getGroupCount() {return headers.length;}
+		@Override public int getChildrenCount(int p0) {return quote_offset[p0 + 1] - quote_offset[p0];}
+		@Override public Object getGroup(int p0) {return headers[p0];}
+		@Override public Object getChild(int p0, int p1) {return items[quote_offset[p0] + p1];}
+		@Override public long getGroupId(int p0) {return p0;}
+		@Override public long getChildId(int p0, int p1) {return quote_offset[p0] + p1;}
+		@Override public boolean hasStableIds() {return false;}
+		@Override public boolean isChildSelectable(int p0, int p1) {return false;}
+		@Override public View getGroupView(int p0, boolean p1, View p2, ViewGroup p3) {
+			if (p2 == null) p2 = LayoutInflater.from(MainActivity.this).inflate(R.layout.header, null);
+			((TextView)p2.findViewById(R.id.header_text)).setText(headers[p0]);
+			return p2;
+		}
+		@Override public View getChildView(int p0, int p1, boolean p2, View p3, ViewGroup p4) {
+			TextView tv;
+			final int sound_id = quote_offset[p0] + p1;
+			if (p3 == null) p3 = LayoutInflater.from(MainActivity.this).inflate(R.layout.bubble, null);
+			tv = p3.findViewById(R.id.bubble_text);
+			tv.setText(items[quote_offset[p0] + p1]);
+			tv.setOnClickListener(new OnClickListener() {
+					@Override
+					public void onClick(View p5) {
+						if (getIntent().getAction() == RingtoneManager.ACTION_RINGTONE_PICKER) {
+							setResult(RESULT_OK, new Intent().putExtra(RingtoneManager.EXTRA_RINGTONE_PICKED_URI, Uri.parse(new StringBuilder().append("android.resource://apertx.turret.sound/").append(SOUND_RES_ID + sound_id).toString())));
+							finish();
+						} else {
+							if (sound_id < sound_done)
+								sound.play(sound_id + 1, 1.0f, 1.0f, SOUND_PRIORITY, 0, 1.0f);
+							else {
+								MediaPlayer mp = MediaPlayer.create(MainActivity.this, SOUND_RES_ID + sound_id);
+								mp.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+										@Override public void onCompletion(MediaPlayer p5) {
+											p5.release();
+										}
+									});
+								mp.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+										@Override public void onPrepared(MediaPlayer p5) {
+											p5.start();
+										}
+									});
+							}
+							clicks += 1;
+						}
+					}
+				});
+			if (sets[0]) ((LinearLayout)p3.findViewById(R.id.bubble_layout)).startAnimation(anim);
+			return p3;
+		}
 	}
 
 	@Override public boolean onCreateOptionsMenu(Menu p0) {
