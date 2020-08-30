@@ -71,5 +71,18 @@
 
 	</LinearLayout>
 
+	<ImageView
+		android:layout_width="wrap_content"
+		android:layout_height="fill_parent"
+		android:id="@+id/bubble_notif"
+		android:layout_marginTop="@dimen/bubble_margin"
+		android:layout_marginBottom="@dimen/bubble_margin"/>
+
+	<ImageView
+		android:layout_width="wrap_content"
+		android:layout_height="fill_parent"
+		android:id="@+id/bubble_fav"
+		android:layout_margin="@dimen/bubble_margin"/>
+
 </LinearLayout>
 

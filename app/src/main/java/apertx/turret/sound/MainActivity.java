@@ -2,33 +2,39 @@ package apertx.turret.sound;
 
 import android.app.*;
 import android.content.*;
+import android.database.*;
 import android.media.*;
 import android.net.*;
 import android.os.*;
 import android.view.*;
-import android.widget.*;
-import android.widget.ExpandableListView.*;
-import java.util.*;
+import android.view.View.*;
 import android.view.animation.*;
+import android.widget.*;
+import java.util.*;
 
 public class MainActivity extends Activity {
-	static final int ID_MENU_SETTINGS = 10;
-	static final int ID_MENU_EXIT = 11;
-	static final int ID_MENU_APP_IN_GP = 12;
-	static final int ID_MENU_SOURCE_CODE = 13;
-	static final int ID_MENU_STAT = 14;
-	static final int ID_MENU_ABOUT = 15;
+	static final int ID_MENU_FAVS = 10;
+	static final int ID_MENU_SETTINGS = 11;
+	static final int ID_MENU_EXIT = 12;
+	static final int ID_MENU_APP_IN_GP = 13;
+	static final int ID_MENU_SOURCE_CODE = 14;
+	static final int ID_MENU_STAT = 15;
+	static final int ID_MENU_ABOUT = 16;
 
 	static final int SOUND_MAX_STREAMS = 8;
 	static final int SOUND_PRIORITY = 1;
 	static final int SOUND_RES_ID = 0x7f040000;
 
 	ExpandableListView elv;
+	ListView list;
 	SharedPreferences settings;
 
 	SoundPool sound;
 	byte sound_done;
+	boolean fav_mode;
+	boolean isPicker;
 	int clicks;
+	String favs;
 	boolean[] sets;
 
 	public void onCreate(Bundle b0) {
@@ -47,8 +53,14 @@ public class MainActivity extends Activity {
 		final int last_quote = getResources().getInteger(R.integer.last_quote);
 		sets = new boolean[1];
 		sets[0] = settings.getBoolean("animate", false);
+		favs = settings.getString("favs", getResources().getString(R.string.fav_default));
 		sound_done = 0;
+		fav_mode = false;
+		isPicker = getIntent().getAction().equals(RingtoneManager.ACTION_RINGTONE_PICKER);
 
+		list = new ListView(this);
+		list.setDividerHeight(0);
+		list.setBackgroundResource(R.color.bubble_primary);
 		elv = new ExpandableListView(this);
 		elv.setDividerHeight(0);
 		elv.setBackgroundResource(R.color.bubble_primary);
@@ -93,7 +105,7 @@ public class MainActivity extends Activity {
 			final int sound_id = quote_offset[p0] + p1;
 			if (p3 == null) p3 = LayoutInflater.from(MainActivity.this).inflate(R.layout.bubble, null);
 			tv = p3.findViewById(R.id.bubble_text);
-			tv.setText(items[quote_offset[p0] + p1]);
+			tv.setText(items[sound_id]);
 			tv.setOnClickListener(new OnClickListener() {
 					@Override
 					public void onClick(View p5) {
@@ -120,12 +132,114 @@ public class MainActivity extends Activity {
 						}
 					}
 				});
+			final ImageView iv = p3.findViewById(R.id.bubble_fav);
+			if (favs.charAt(sound_id) == 'a') iv.setImageResource(R.drawable.ic_unfavorite);
+			else iv.setImageResource(R.drawable.ic_favorite);
+			iv.setOnClickListener(new OnClickListener() {
+					@Override
+					public void onClick(View p5) {
+						char[] chf = favs.toCharArray();
+						if (chf[sound_id] == 'a') {
+							iv.setImageResource(R.drawable.ic_favorite);
+							chf[sound_id] = 'b';
+						} else {
+							iv.setImageResource(R.drawable.ic_unfavorite);
+							chf[sound_id] = 'a';
+						}
+						favs = String.valueOf(chf);
+					}
+				});
 			if (sets[0]) ((LinearLayout)p3.findViewById(R.id.bubble_layout)).startAnimation(anim);
 			return p3;
 		}
 	}
 
+	class Laa implements ListAdapter {
+		Animation anim;
+		String[] items;
+		List<Integer> id_items;
+		Laa() {
+			anim = new AlphaAnimation(0.5f, 1.0f);
+			anim.setDuration(200);
+			items = getResources().getStringArray(R.array.quote_items);
+			id_items = new ArrayList<Integer>();
+			for (int i = 0; i < items.length; i += 1)
+				if (favs.charAt(i) == 'b')
+					id_items.add(i);
+		}
+		@Override public void registerDataSetObserver(DataSetObserver p1) {}
+		@Override public void unregisterDataSetObserver(DataSetObserver p1) {}
+		@Override public int getCount() {return id_items.size();}
+		@Override public Object getItem(int p0) {return null;}
+		@Override public long getItemId(int p0) {return p0;}
+		@Override public boolean hasStableIds() {return false;}
+		@Override public View getView(int p0, View p1, ViewGroup p2) {
+			TextView tv;
+			final int sound_id = p0;
+			if (p1 == null) p1 = LayoutInflater.from(MainActivity.this).inflate(R.layout.bubble, null);
+			tv = p1.findViewById(R.id.bubble_text);
+			tv.setText(items[id_items.get(sound_id)]);
+			tv.setOnClickListener(new OnClickListener() {
+					@Override
+					public void onClick(View p5) {
+						if (isPicker) {
+							setResult(RESULT_OK, new Intent().putExtra(RingtoneManager.EXTRA_RINGTONE_PICKED_URI, Uri.parse(new StringBuilder().append("android.resource://apertx.turret.sound/").append(SOUND_RES_ID + sound_id).toString())));
+							finish();
+						} else {
+							if (sound_id < sound_done)
+								sound.play(id_items.get(sound_id) + 1, 1.0f, 1.0f, SOUND_PRIORITY, 0, 1.0f);
+							else {
+								MediaPlayer mp = MediaPlayer.create(MainActivity.this, SOUND_RES_ID + sound_id);
+								mp.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+										@Override public void onCompletion(MediaPlayer p5) {
+											p5.release();
+										}
+									});
+								mp.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+										@Override public void onPrepared(MediaPlayer p5) {
+											p5.start();
+										}
+									});
+							}
+							clicks += 1;
+						}
+					}
+				});
+			final ImageView iv = p1.findViewById(R.id.bubble_fav);
+			iv.setImageResource(R.drawable.ic_favorite);
+			iv.setOnClickListener(new OnClickListener() {
+					@Override
+					public void onClick(View p5) {
+						char[] chf = favs.toCharArray();
+						chf[(int)id_items.get(sound_id)] = 'a';
+						favs = String.valueOf(chf);
+						id_items.remove(sound_id);
+						list.setAdapter(new Laa());
+					}
+				});
+			if (isPicker) {
+				ImageView niv = p1.findViewById(R.id.bubble_notif);
+				niv.setImageResource(R.drawable.ic_notification);
+				niv.setOnClickListener(new OnClickListener() {
+						@Override
+						public void onClick(View p5) {
+							new AlertDialog.Builder(MainActivity.this).
+								setTitle(
+						}
+					});
+			}
+			if (sets[0]) ((LinearLayout)p1.findViewById(R.id.bubble_layout)).startAnimation(anim);
+			return p1;
+		}
+		@Override public int getItemViewType(int p0) {return IGNORE_ITEM_VIEW_TYPE;}
+		@Override public int getViewTypeCount() {return 1;}
+		@Override public boolean isEmpty() {return id_items.isEmpty();}
+		@Override public boolean areAllItemsEnabled() {return false;}
+		@Override public boolean isEnabled(int p1) {return false;}
+	}
+
 	@Override public boolean onCreateOptionsMenu(Menu p0) {
+		p0.add(Menu.NONE, ID_MENU_FAVS, Menu.NONE, getString(R.string.fav));
 		p0.add(Menu.NONE, ID_MENU_SETTINGS, Menu.NONE, getString(R.string.settings));
 		SubMenu sm = p0.addSubMenu(getString(R.string.help));
 		sm.add(Menu.NONE, ID_MENU_APP_IN_GP, Menu.NONE, R.string.app_in_gp);
@@ -138,6 +252,13 @@ public class MainActivity extends Activity {
 
 	@Override public boolean onOptionsItemSelected(MenuItem p0) {
 		switch (p0.getItemId()) {
+			case ID_MENU_FAVS:
+				if (fav_mode == false) {
+					fav_mode = true;
+					list.setAdapter(new Laa());
+					setContentView(list);
+				}
+				break;
 			case ID_MENU_SETTINGS:
 				new AlertDialog.Builder(this).
 					setTitle(R.string.settings).
@@ -187,12 +308,22 @@ public class MainActivity extends Activity {
 		sets = b0.getBooleanArray("sets");
 	}
 
+	@Override
+	public void onBackPressed() {
+		if (fav_mode) {
+			setContentView(elv);
+			fav_mode = false;
+		} else
+			super.onBackPressed();
+	}
+
 	@Override protected void onDestroy() {
 		super.onDestroy();
 		sound.release();
 		settings.edit().
 			putInt("clicks", clicks).
 			putBoolean("animate", sets[0]).
+			putString("favs", favs).
 			commit();
 	}
 }
