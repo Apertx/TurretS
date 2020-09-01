@@ -11,6 +11,7 @@ import android.view.View.*;
 import android.view.animation.*;
 import android.widget.*;
 import java.util.*;
+import android.provider.*;
 
 public class MainActivity extends Activity {
 	static final int ID_MENU_FAVS = 10;
@@ -43,12 +44,6 @@ public class MainActivity extends Activity {
 		settings = getSharedPreferences("data", MODE_PRIVATE);
 		clicks = settings.getInt("clicks", 0);
 		sound = new SoundPool(SOUND_MAX_STREAMS, AudioManager.STREAM_MUSIC, 0);
-		sound.setOnLoadCompleteListener(new SoundPool.OnLoadCompleteListener() {
-				@Override public void onLoadComplete(SoundPool p0, int p1, int p2) {
-					if (p2 == 0) sound_done += 1;
-					else finish();
-				}
-			});
 
 		final int last_quote = getResources().getInteger(R.integer.last_quote);
 		sets = new boolean[1];
@@ -69,8 +64,8 @@ public class MainActivity extends Activity {
 
 		new Thread(new Runnable() {
 				@Override public void run() {
-					for (int i = 0; i < last_quote; i++)
-						sound.load(MainActivity.this, SOUND_RES_ID + i, SOUND_PRIORITY);
+					for (sound_done = 0; sound_done < last_quote; sound_done++)
+						sound.load(MainActivity.this, SOUND_RES_ID + sound_done, SOUND_PRIORITY);
 				}
 			}).start();
 	}
@@ -109,7 +104,7 @@ public class MainActivity extends Activity {
 			tv.setOnClickListener(new OnClickListener() {
 					@Override
 					public void onClick(View p5) {
-						if (getIntent().getAction() == RingtoneManager.ACTION_RINGTONE_PICKER) {
+						if (isPicker) {
 							setResult(RESULT_OK, new Intent().putExtra(RingtoneManager.EXTRA_RINGTONE_PICKED_URI, Uri.parse(new StringBuilder().append("android.resource://apertx.turret.sound/").append(SOUND_RES_ID + sound_id).toString())));
 							finish();
 						} else {
@@ -149,6 +144,44 @@ public class MainActivity extends Activity {
 						favs = String.valueOf(chf);
 					}
 				});
+			if (isPicker == false) {
+				ImageView niv = p3.findViewById(R.id.bubble_notif);
+				niv.setImageResource(R.drawable.ic_notification);
+				niv.setOnClickListener(new OnClickListener() {
+						@Override
+						public void onClick(View p5) {
+							if (Integer.parseInt(Build.VERSION.SDK) >= 23) {
+								if (Settings.System.canWrite(MainActivity.this))
+									new AlertDialog.Builder(MainActivity.this).
+										setTitle(R.string.set_sound).
+										setItems(R.array.notif, new DialogInterface.OnClickListener() {
+											@Override public void onClick(DialogInterface p5, int p6) {
+												RingtoneManager.setActualDefaultRingtoneUri(MainActivity.this, RingtoneManager.TYPE_RINGTONE << p6, Uri.parse(new StringBuilder().append("android.resource://apertx.turret.sound/").append(SOUND_RES_ID + sound_id).toString()));
+											}
+										}).
+										show();
+								else
+									new AlertDialog.Builder(MainActivity.this).
+										setMessage(R.string.notif_warn).
+										setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+											@Override
+											public void onClick(DialogInterface p5, int p6) {
+												startActivity(new Intent(Settings.ACTION_MANAGE_WRITE_SETTINGS));
+											}
+										}).
+										show();
+							} else	
+								new AlertDialog.Builder(MainActivity.this).
+									setTitle(R.string.set_sound).
+									setItems(R.array.notif, new DialogInterface.OnClickListener() {
+										@Override public void onClick(DialogInterface p5, int p6) {
+											RingtoneManager.setActualDefaultRingtoneUri(MainActivity.this, RingtoneManager.TYPE_RINGTONE << p6, Uri.parse(new StringBuilder().append("android.resource://apertx.turret.sound/").append(SOUND_RES_ID + sound_id).toString()));
+										}
+									}).
+									show();
+						}
+					});
+			}
 			if (sets[0]) ((LinearLayout)p3.findViewById(R.id.bubble_layout)).startAnimation(anim);
 			return p3;
 		}
@@ -217,14 +250,36 @@ public class MainActivity extends Activity {
 						list.setAdapter(new Laa());
 					}
 				});
-			if (isPicker) {
+			if (isPicker == false) {
 				ImageView niv = p1.findViewById(R.id.bubble_notif);
 				niv.setImageResource(R.drawable.ic_notification);
 				niv.setOnClickListener(new OnClickListener() {
 						@Override
 						public void onClick(View p5) {
-							new AlertDialog.Builder(MainActivity.this).
-								setTitle(
+							if (Integer.parseInt(Build.VERSION.SDK) >= 23) {
+								if (Settings.System.canWrite(MainActivity.this))
+									new AlertDialog.Builder(MainActivity.this).
+										setTitle(R.string.set_sound).
+										setItems(R.array.notif, new DialogInterface.OnClickListener() {
+											@Override public void onClick(DialogInterface p5, int p6) {
+												RingtoneManager.setActualDefaultRingtoneUri(MainActivity.this, RingtoneManager.TYPE_RINGTONE << p6, Uri.parse(new StringBuilder().append("android.resource://apertx.turret.sound/").append(SOUND_RES_ID + sound_id).toString()));
+											}
+										}).
+										show();
+								else
+									new AlertDialog.Builder(MainActivity.this).
+										setMessage(R.string.notif_warn).
+										setPositiveButton(R.string.ok, null).
+										show();
+							} else	
+								new AlertDialog.Builder(MainActivity.this).
+									setTitle(R.string.set_sound).
+									setItems(R.array.notif, new DialogInterface.OnClickListener() {
+										@Override public void onClick(DialogInterface p5, int p6) {
+											RingtoneManager.setActualDefaultRingtoneUri(MainActivity.this, RingtoneManager.TYPE_RINGTONE << p6, Uri.parse(new StringBuilder().append("android.resource://apertx.turret.sound/").append(SOUND_RES_ID + sound_id).toString()));
+										}
+									}).
+									show();
 						}
 					});
 			}
@@ -308,13 +363,11 @@ public class MainActivity extends Activity {
 		sets = b0.getBooleanArray("sets");
 	}
 
-	@Override
-	public void onBackPressed() {
+	@Override public void onBackPressed() {
 		if (fav_mode) {
-			setContentView(elv);
 			fav_mode = false;
-		} else
-			super.onBackPressed();
+			setContentView(elv);
+		} else finish();
 	}
 
 	@Override protected void onDestroy() {
