@@ -6,12 +6,13 @@ import android.database.*;
 import android.media.*;
 import android.net.*;
 import android.os.*;
+import android.provider.*;
 import android.view.*;
 import android.view.View.*;
 import android.view.animation.*;
 import android.widget.*;
+import apertx.turret.sound.*;
 import java.util.*;
-import android.provider.*;
 
 public class MainActivity extends Activity {
 	static final int ID_MENU_FAVS = 10;
@@ -64,8 +65,10 @@ public class MainActivity extends Activity {
 
 		new Thread(new Runnable() {
 				@Override public void run() {
-					for (sound_done = 0; sound_done < last_quote; sound_done++)
+					while (sound_done != last_quote) {
 						sound.load(MainActivity.this, SOUND_RES_ID + sound_done, SOUND_PRIORITY);
+						sound_done += 1;
+					}
 				}
 			}).start();
 	}
@@ -102,8 +105,7 @@ public class MainActivity extends Activity {
 			tv = p3.findViewById(R.id.bubble_text);
 			tv.setText(items[sound_id]);
 			tv.setOnClickListener(new OnClickListener() {
-					@Override
-					public void onClick(View p5) {
+					@Override public void onClick(View p5) {
 						if (isPicker) {
 							setResult(RESULT_OK, new Intent().putExtra(RingtoneManager.EXTRA_RINGTONE_PICKED_URI, Uri.parse(new StringBuilder().append("android.resource://apertx.turret.sound/").append(SOUND_RES_ID + sound_id).toString())));
 							finish();
@@ -131,8 +133,7 @@ public class MainActivity extends Activity {
 			if (favs.charAt(sound_id) == 'a') iv.setImageResource(R.drawable.ic_unfavorite);
 			else iv.setImageResource(R.drawable.ic_favorite);
 			iv.setOnClickListener(new OnClickListener() {
-					@Override
-					public void onClick(View p5) {
+					@Override public void onClick(View p5) {
 						char[] chf = favs.toCharArray();
 						if (chf[sound_id] == 'a') {
 							iv.setImageResource(R.drawable.ic_favorite);
@@ -148,8 +149,7 @@ public class MainActivity extends Activity {
 				ImageView niv = p3.findViewById(R.id.bubble_notif);
 				niv.setImageResource(R.drawable.ic_notification);
 				niv.setOnClickListener(new OnClickListener() {
-						@Override
-						public void onClick(View p5) {
+						@Override public void onClick(View p5) {
 							if (Integer.parseInt(Build.VERSION.SDK) >= 23) {
 								if (Settings.System.canWrite(MainActivity.this))
 									new AlertDialog.Builder(MainActivity.this).
@@ -166,7 +166,7 @@ public class MainActivity extends Activity {
 										setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
 											@Override
 											public void onClick(DialogInterface p5, int p6) {
-												startActivity(new Intent(Settings.ACTION_MANAGE_WRITE_SETTINGS));
+												startActivity(new Intent(android.provider.Settings.ACTION_MANAGE_WRITE_SETTINGS));
 											}
 										}).
 										show();
@@ -213,8 +213,7 @@ public class MainActivity extends Activity {
 			tv = p1.findViewById(R.id.bubble_text);
 			tv.setText(items[id_items.get(sound_id)]);
 			tv.setOnClickListener(new OnClickListener() {
-					@Override
-					public void onClick(View p5) {
+					@Override public void onClick(View p5) {
 						if (isPicker) {
 							setResult(RESULT_OK, new Intent().putExtra(RingtoneManager.EXTRA_RINGTONE_PICKED_URI, Uri.parse(new StringBuilder().append("android.resource://apertx.turret.sound/").append(SOUND_RES_ID + sound_id).toString())));
 							finish();
@@ -241,8 +240,7 @@ public class MainActivity extends Activity {
 			final ImageView iv = p1.findViewById(R.id.bubble_fav);
 			iv.setImageResource(R.drawable.ic_favorite);
 			iv.setOnClickListener(new OnClickListener() {
-					@Override
-					public void onClick(View p5) {
+					@Override public void onClick(View p5) {
 						char[] chf = favs.toCharArray();
 						chf[(int)id_items.get(sound_id)] = 'a';
 						favs = String.valueOf(chf);
@@ -254,8 +252,7 @@ public class MainActivity extends Activity {
 				ImageView niv = p1.findViewById(R.id.bubble_notif);
 				niv.setImageResource(R.drawable.ic_notification);
 				niv.setOnClickListener(new OnClickListener() {
-						@Override
-						public void onClick(View p5) {
+						@Override public void onClick(View p5) {
 							if (Integer.parseInt(Build.VERSION.SDK) >= 23) {
 								if (Settings.System.canWrite(MainActivity.this))
 									new AlertDialog.Builder(MainActivity.this).
@@ -269,7 +266,11 @@ public class MainActivity extends Activity {
 								else
 									new AlertDialog.Builder(MainActivity.this).
 										setMessage(R.string.notif_warn).
-										setPositiveButton(R.string.ok, null).
+										setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+											@Override public void onClick(DialogInterface p5, int p6) {
+												startActivity(new Intent(Settings.ACTION_MANAGE_WRITE_SETTINGS));
+											}
+										}).
 										show();
 							} else	
 								new AlertDialog.Builder(MainActivity.this).
@@ -367,7 +368,7 @@ public class MainActivity extends Activity {
 		if (fav_mode) {
 			fav_mode = false;
 			setContentView(elv);
-		} else finish();
+		} else super.onBackPressed();
 	}
 
 	@Override protected void onDestroy() {
